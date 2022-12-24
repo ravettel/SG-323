@@ -448,7 +448,10 @@ void SG323AudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
         outputBuffer.clear(i, 0, bufferSize);
     // sum input channels together
     monoBuffer.copyFrom(0, 0, buffer, 0, 0, bufferSize);
-    monoBuffer.addFrom(0, 0, buffer, 1, 0, bufferSize);
+    if (totalNumInputChannels == 2)
+    {
+        monoBuffer.addFrom(0, 0, buffer, 1, 0, bufferSize);
+    }
     // apply input gain
     float inputGainValue = *apvts.getRawParameterValue("INPUT");
     inputGainSmooth.setTargetValue(inputGainValue * 0.5f);
@@ -662,7 +665,10 @@ void SG323AudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
         outputDelayGain = outputGainArray[7] * outputDelayGainMult;
         rightOutputSample += fractionalDelay.popSample(0, outputDelayTime * lastSampleRate, true) * outputDelayGain;
         outputBuffer.setSample(0, i, leftOutputSample);
-        outputBuffer.setSample(1, i, rightOutputSample);
+        if (totalNumOutputChannels == 2)
+        {
+            outputBuffer.setSample(1, i, rightOutputSample);
+        }
     }
     // apply de-emphasis filter on output taps
     deEmphasis.process(juce::dsp::ProcessContextReplacing<float>(outputBlock));
